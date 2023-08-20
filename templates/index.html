@@ -3,6 +3,25 @@
 <head>
     <title>Game Recommendations</title>
     <style>
+        body {
+            display: flex;
+            flex-direction: row;
+        }
+
+        #charts {
+            flex: 1;
+            padding: 20px;
+        }
+
+        #charts > div {
+            margin-bottom: 20px;
+        }
+
+        #table-container {
+            flex: 1;
+            padding: 20px;
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
@@ -23,35 +42,45 @@
 <body>
     <h1>Game Recommendations</h1>
 
-    <form action="/" method="POST">
-        <label for="game">Enter a game title:</label>
-        <input type="text" id="game" name="game" required>
-        <button type="submit">Get Recommendations</button>
-    </form>
-    {% if recommendations is not none and not recommendations.empty %}
-    <h2>Recommendations for "{{ game }}"</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Genre</th>
-                <th>Price</th>
-                <th>Reviews</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in recommendations.iterrows() %}
+    <div id="charts">
+        <div id="barChart"></div>
+        {{ bar_chart | safe }}
+
+        <div id="scatterPlot"></div>
+        {{ scatter_plot | safe }}
+    </div>
+
+    <div id="table-container">
+        <form action="/" method="POST">
+            <label for="game">Enter a game title:</label>
+            <input type="text" id="game" name="game" required>
+            <button type="submit">Get Recommendations</button>
+        </form>
+        {% if recommendations is not none and not recommendations.empty %}
+        <h2>Recommendations for "{{ game }}"</h2>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ item[1]['name'] }}</td>
-                    <td>{{ item[1]['genre'] }}</td>
-                    <td>{{ item[1]['original_price'] }}</td>
-                    <td>{{ item[1]['review_sentiment'] }}</td>
+                    <th>Title</th>
+                    <th>Genre</th>
+                    <th>Price</th>
+                    <th>Reviews</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-        <p>No recommendations available.</p>
-    {% endif %}
+            </thead>
+            <tbody>
+                {% for item in recommendations.iterrows() %}
+                    <tr>
+                        <td>{{ item[1]['name'] }}</td>
+                        <td>{{ item[1]['genre'] }}</td>
+                        <td>{{ item[1]['original_price'] }}</td>
+                        <td>{{ item[1]['review_sentiment'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No recommendations available.</p>
+        {% endif %}
+    </div>
 </body>
 </html>
