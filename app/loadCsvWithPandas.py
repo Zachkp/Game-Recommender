@@ -24,10 +24,14 @@ matrix.toarray()
 
 similarity = cosine_similarity(matrix, matrix)
 
+indices = pd.Series(df2.index, index=df2['name'])
+indices = indices[~indices.index.duplicated(keep='last')]
+
 
 def recommender(title, cos_similarity, dataframe):
-    indices = pd.Series(dataframe.index, index=dataframe['name'])
-    indices = indices[~indices.index.duplicated(keep='last')]
+    #indices = pd.Series(dataframe.index, index=dataframe['name'])
+    #indices = indices[~indices.index.duplicated(keep='last')]
+
     game_index = indices[title]
     similarity_scores = pd.DataFrame(cos_similarity[game_index], columns=["score"])
     game_indices = similarity_scores.sort_values("score", ascending=False).index
