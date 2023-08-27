@@ -1,5 +1,5 @@
-import numpy as np
 import pandas as pd
+import numpy as np
 import os
 import io
 import base64
@@ -12,9 +12,11 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 500)
 pd.set_option('display.expand_frame_repr', False)
 
-df = pd.read_csv(os.path.join(os.path.dirname(__file__), "../files/steam_games.csv"))
+df = pd.read_csv(os.path.join(os.path.dirname(__file__), "../files/steam_games.csv"),
+                 usecols=["name", "desc_snippet", "popular_tags", "genre", "original_price", "all_reviews"])
 df1 = df[["name", "desc_snippet", "popular_tags", "genre", "original_price", "all_reviews"]]
 df2 = pd.DataFrame(df1.dropna())
+df2.info(verbose=False, memory_usage="deep")
 
 tfidf = TfidfVectorizer(stop_words="english")
 matrix = tfidf.fit_transform(df2["desc_snippet"])
@@ -29,9 +31,6 @@ indices = indices[~indices.index.duplicated(keep='last')]
 
 
 def recommender(title, cos_similarity, dataframe):
-    #indices = pd.Series(dataframe.index, index=dataframe['name'])
-    #indices = indices[~indices.index.duplicated(keep='last')]
-
     game_index = indices[title]
     similarity_scores = pd.DataFrame(cos_similarity[game_index], columns=["score"])
     game_indices = similarity_scores.sort_values("score", ascending=False).index
@@ -56,12 +55,6 @@ def recommender(title, cos_similarity, dataframe):
 
 
 def createBarGraph(recommendations):
-    import io
-    import base64
-    import numpy as np
-    import pandas as pd
-    import matplotlib.pyplot as plt
-
     # Convert original_price column to numeric and handle non-numeric values
     recommendations['original_price'] = recommendations['original_price'].str.replace('[\$,]', '', regex=True)
     recommendations['original_price'] = pd.to_numeric(recommendations['original_price'], errors='coerce')
