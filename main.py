@@ -8,19 +8,28 @@ app.secret_key = '6358'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    game = None  # Default value
+    game = ""  # Default value
+    state = "search"  # Default value
     recommendations = None  # Default value
     chart = ""  # Initialize chart
     scatterPlot = ""  # Initialize chart
 
     if request.method == 'POST':
         game = request.form.get('game')
+        state = request.form.get('state')
+
+        if 'reset' in request.form:  # Check if reset button was clicked
+            state = 'search'
+            game = ""
+            return render_template('index.html', game=game, recommendations=recommendations, bar_chart=chart,
+                                   scatter_plot=scatterPlot, state=state)
 
         if game not in loadCsvWithPandas.indices:
             flash(f"Title '{game}' not found in the dataframe. Please enter a valid game title.", "error")
             return render_template('index.html', game=game, recommendations=recommendations, bar_chart=chart,
+                                   scatter_plot=scatterPlot, state=state)
 
-                                   scatter_plot=scatterPlot)
+        state = 'reset'
         recommendations = loadCsvWithPandas.recommender(game, loadCsvWithPandas.similarity, loadCsvWithPandas.df2)
         recommendations = recommendations.head(50)
         chart = loadCsvWithPandas.createBarGraph(recommendations)
@@ -28,11 +37,13 @@ def index():
 
         used_memory = psutil.virtual_memory().used
         used_memory_mb = used_memory / (1024 * 1024)
-
         print(f"Used Memory: {used_memory_mb:.2f} MB")
 
-    return render_template('index.html', game=game, recommendations=recommendations, bar_chart=chart,
-                           scatter_plot=scatterPlot)
+        return render_template('index.html', game=game, recommendations=recommendations, bar_chart=chart,
+                               scatter_plot=scatterPlot, state=state)
+    else:
+        return render_template('index.html', game=game, recommendations=recommendations, bar_chart=chart,
+                               scatter_plot=scatterPlot, state=state)
 
 
 if __name__ == '__main__':

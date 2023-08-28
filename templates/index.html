@@ -52,9 +52,15 @@
 
     <div id="table-container">
         <form action="/" method="POST">
-            <label for="game">Enter a game title:</label>
-            <input type="text" id="game" name="game" required>
-            <button type="submit">Get Recommendations</button>
+            <label for="game">Enter a Game Title:</label>
+            <input type="text" name="game" id="game" value="{{ game }}">
+            <input type="hidden" name="state" value="search"> <!-- Set initial state to 'search' -->
+
+            {% if state == 'search' %}
+                <input type="submit" value="Search"> <!-- Display Search Button -->
+            {% else %}
+                <button type="submit" name="reset" value="reset">Reset</button> <!-- Display Reset Button -->
+            {% endif %}
         </form>
         {% if recommendations is not none and not recommendations.empty %}
         <h2>Recommendations for "{{ game }}"</h2>
