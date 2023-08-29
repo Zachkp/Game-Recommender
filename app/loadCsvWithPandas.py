@@ -4,29 +4,36 @@ import os
 import io
 import base64
 
+import psutil
 from matplotlib import pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 500)
 pd.set_option('display.expand_frame_repr', False)
 
 df = pd.read_csv(os.path.join(os.path.dirname(__file__), "../files/steam_games.csv"),
-                 usecols=["name", "desc_snippet", "popular_tags", "genre", "original_price", "all_reviews"])
-df1 = df[["name", "desc_snippet", "popular_tags", "genre", "original_price", "all_reviews"]]
-df2 = pd.DataFrame(df1.dropna())
-df2.info(verbose=False, memory_usage="deep")
+                 usecols=["name", "desc_snippet", "popular_tags", "genre", "original_price", "all_reviews"],
+                 na_filter=True)
+df = pd.DataFrame(df.dropna())
+
+# Memory Usage Testing
+df.info(verbose=False, memory_usage="deep")
+used_memory = psutil.virtual_memory().used
+used_memory_mb = used_memory / 1024 / 1024
+print(f"Used Memory from loadCsvWithPandas: {used_memory_mb:.2f} MB")
 
 tfidf = TfidfVectorizer(stop_words="english")
-matrix = tfidf.fit_transform(df2["desc_snippet"])
+matrix = tfidf.fit_transform(df["desc_snippet"])
 
 tfidf.get_feature_names_out()
 matrix.toarray()
 
-similarity = cosine_similarity(matrix, matrix)
+similarity = cosine_similarity(matrix)
 
-indices = pd.Series(df2.index, index=df2['name'])
+indices = pd.Series(df.index, index=df['name'])
 indices = indices[~indices.index.duplicated(keep='last')]
 
 
@@ -50,6 +57,10 @@ def recommender(title, cos_similarity, dataframe):
         (recommended_games['review_sentiment'].isin(positive_reviews)) &
         (recommended_games['total_reviews'] >= 50)
         ]
+
+    um = psutil.virtual_memory().used
+    umMB = um / 1024 / 1024
+    print(f"Used Memory from recommender: {umMB:.2f} MB")
 
     return recommended_games[['name', 'genre', 'original_price', 'review_sentiment']]
 

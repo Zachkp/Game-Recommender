@@ -5,6 +5,9 @@ import psutil
 app = Flask(__name__)
 app.secret_key = '6358'
 
+used_memory = psutil.virtual_memory().used
+used_memory_mb = used_memory / 1024 / 1024
+print(f"Used Memory from Main: {used_memory_mb:.2f} MB")
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -30,13 +33,11 @@ def index():
                                    scatter_plot=scatterPlot, state=state)
 
         state = 'reset'
-        recommendations = loadCsvWithPandas.recommender(game, loadCsvWithPandas.similarity, loadCsvWithPandas.df2)
+        recommendations = loadCsvWithPandas.recommender(game, loadCsvWithPandas.similarity, loadCsvWithPandas.df)
         recommendations = recommendations.head(50)
         chart = loadCsvWithPandas.createBarGraph(recommendations)
         scatterPlot = loadCsvWithPandas.createPriceSentimentScatter(recommendations)
 
-        used_memory = psutil.virtual_memory().used
-        used_memory_mb = used_memory / (1024 * 1024)
         print(f"Used Memory: {used_memory_mb:.2f} MB")
 
         return render_template('index.html', game=game, recommendations=recommendations, bar_chart=chart,
