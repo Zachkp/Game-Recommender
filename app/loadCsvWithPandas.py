@@ -35,7 +35,7 @@ similarity = cosine_similarity(matrix)
 
 indices = pd.Series(df.index, index=df['name'])
 indices = indices[~indices.index.duplicated(keep='last')]
-
+asd
 
 def recommender(title, cos_similarity, dataframe):
     game_index = indices[title]
